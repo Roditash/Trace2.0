@@ -24,6 +24,19 @@
   --star: 234 179 8;
   /* Borde/reflejo del lenguaje de cristal (oscuro sobre tema claro) */
   --glass-edge: 23 23 28;
+  /* Acento secundario (índigo) usado en gradientes ambientales y conceptos. */
+  --accent-2: 99 102 241;
+
+  /* ----------------------------------------------------------------------
+     Sistema de elevación (sombras por capas). Fuente única de profundidad.
+     Inspiración: Linear / visionOS / Apple. La profundidad nace de la SUMA
+     de una sombra de contacto cercana (nítida, baja opacidad) y una sombra
+     ambiental lejana (difusa). Nunca una sola sombra dura.
+     En tema claro las sombras son más visibles (luz natural). ---------- */
+  --shadow-sm: 0 1px 2px rgb(15 23 42 / 0.06), 0 1px 3px rgb(15 23 42 / 0.05);
+  --shadow-md: 0 2px 4px rgb(15 23 42 / 0.05), 0 6px 16px rgb(15 23 42 / 0.08);
+  --shadow-lg: 0 4px 8px rgb(15 23 42 / 0.06), 0 16px 40px rgb(15 23 42 / 0.12);
+  --shadow-xl: 0 8px 16px rgb(15 23 42 / 0.08), 0 32px 64px rgb(15 23 42 / 0.16);
 }
 
 .dark {
@@ -43,6 +56,15 @@
   --star: 250 204 21;
   /* Borde/reflejo del lenguaje de cristal (claro sobre tema oscuro) */
   --glass-edge: 255 255 255;
+  /* Acento secundario (índigo) — un punto más luminoso en oscuro. */
+  --accent-2: 129 140 248;
+
+  /* Elevación en tema oscuro: sombras más profundas y negras (el contraste
+     viene de la oscuridad bajo la superficie, no de gris). */
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3), 0 1px 3px rgb(0 0 0 / 0.25);
+  --shadow-md: 0 2px 4px rgb(0 0 0 / 0.3), 0 8px 20px rgb(0 0 0 / 0.35);
+  --shadow-lg: 0 4px 10px rgb(0 0 0 / 0.35), 0 18px 44px rgb(0 0 0 / 0.45);
+  --shadow-xl: 0 10px 24px rgb(0 0 0 / 0.4), 0 36px 72px rgb(0 0 0 / 0.55);
 }
 
 * {
@@ -61,12 +83,12 @@ body {
      las superficies de cristal. Solo gradientes, costo de render mínimo. */
   background-image: radial-gradient(
       60rem 42rem at 85% -10%,
-      rgb(var(--accent) / 0.06),
+      rgb(var(--accent) / 0.07),
       transparent 60%
     ),
     radial-gradient(
       52rem 36rem at -12% 28%,
-      rgb(99 102 241 / 0.05),
+      rgb(var(--accent-2) / 0.06),
       transparent 62%
     );
   background-repeat: no-repeat;
@@ -132,6 +154,76 @@ body {
     text-shadow: 0 0 8px rgb(var(--accent) / 0.45);
   }
 
+  /* ----------------------------------------------------------------------
+     Escala de elevación reutilizable (tokens --shadow-*). Para superficies
+     opacas (no de cristal) que necesitan profundidad consistente. Usar las
+     utilidades en vez de inventar sombras sueltas (regla del Design Audit).
+     -------------------------------------------------------------------- */
+  .elevation-sm {
+    box-shadow: var(--shadow-sm);
+  }
+  .elevation-md {
+    box-shadow: var(--shadow-md);
+  }
+  .elevation-lg {
+    box-shadow: var(--shadow-lg);
+  }
+  .elevation-xl {
+    box-shadow: var(--shadow-xl);
+  }
+
+  /* Texto con gradiente de acento (titulares de la landing). Sobrio: el
+     gradiente va del acento al acento secundario, sin saturar. */
+  .text-gradient-accent {
+    background-image: linear-gradient(
+      135deg,
+      rgb(var(--text)),
+      rgb(var(--text)) 35%,
+      rgb(var(--accent))
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Patrón de rejilla muy sutil para el hero (profundidad de fondo, Linear). */
+  .bg-grid-faint {
+    background-image: linear-gradient(
+        rgb(var(--glass-edge) / 0.04) 1px,
+        transparent 1px
+      ),
+      linear-gradient(90deg, rgb(var(--glass-edge) / 0.04) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+
+  /* ----------------------------------------------------------------------
+     Skeleton / loading shimmer (PART 8). Estado de carga sobrio para el
+     intervalo en que el progreso aún no se ha leído de localStorage.
+     Movimiento lineal y discreto; se respeta "reducir movimiento". -------- */
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    background-color: rgb(var(--surface-2) / 0.6);
+  }
+  .skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      rgb(var(--glass-edge) / 0.06),
+      transparent
+    );
+    animation: skeleton-shimmer 1.4s ease-in-out infinite;
+  }
+  @keyframes skeleton-shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
   /* ==========================================================================
      Lenguaje de cristal v2 (refinado: iOS/visionOS/Linear, elevación por capas).
      JERARQUÍA DE CAPAS (de menor a mayor elevación):
@@ -155,11 +247,10 @@ body {
     background-color: rgb(var(--surface) / 0.62);
     -webkit-backdrop-filter: blur(16px) saturate(1.35);
     backdrop-filter: blur(16px) saturate(1.35);
-    /* Capas: reflejo superior suave + borde interno sutil + doble sombra
-       difusa (contacto cercano + ambiente lejano de baja opacidad). */
+    /* Capas: reflejo superior suave + borde interno sutil + elevación md
+       (token de profundidad unificado: contacto cercano + ambiente lejano). */
     box-shadow: inset 0 1px 0 0 rgb(var(--glass-edge) / 0.08),
-      inset 0 0 0 1px rgb(var(--glass-edge) / 0.03),
-      0 1px 2px rgb(0 0 0 / 0.06), 0 12px 32px rgb(0 0 0 / 0.1);
+      inset 0 0 0 1px rgb(var(--glass-edge) / 0.03), var(--shadow-md);
   }
   .glass-subtle {
     background-color: rgb(var(--surface-2) / 0.55);
@@ -173,8 +264,7 @@ body {
     -webkit-backdrop-filter: blur(22px) saturate(1.45);
     backdrop-filter: blur(22px) saturate(1.45);
     box-shadow: inset 0 1px 0 0 rgb(var(--glass-edge) / 0.1),
-      inset 0 0 0 1px rgb(var(--glass-edge) / 0.04),
-      0 2px 6px rgb(0 0 0 / 0.08), 0 24px 56px rgb(0 0 0 / 0.16);
+      inset 0 0 0 1px rgb(var(--glass-edge) / 0.04), var(--shadow-xl);
   }
   .glass-bar {
     background-color: rgb(var(--bg) / 0.68);

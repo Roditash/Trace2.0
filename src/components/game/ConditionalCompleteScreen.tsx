@@ -18,8 +18,10 @@ import {
 } from "@/lib/motion";
 import StarRating from "@/components/game/StarRating";
 import Button from "@/components/ui/Button";
+import ConceptMasteryCard from "@/components/game/ConceptMasteryCard";
 
 interface ConditionalCompleteScreenProps {
+  levelId: number;
   levelName: string;
   stars: number;
   hintsUsed: number;
@@ -35,6 +37,7 @@ function starMessage(stars: number): string {
 }
 
 export default function ConditionalCompleteScreen({
+  levelId,
   levelName,
   stars,
   hintsUsed,
@@ -103,19 +106,14 @@ export default function ConditionalCompleteScreen({
         {starMessage(stars)}
       </motion.p>
 
-      {/* Concepto aprendido: explicación visual del if */}
-      <motion.div
-        variants={slideVariants}
-        transition={transition.slide}
-        className="glass-elevated mt-6 w-full rounded-2xl border border-accent/30 !bg-accent/5 p-5"
+      {/* Concepto dominado: ENSEÑA "Has aprendido a ___" + visual del if. */}
+      <ConceptMasteryCard
+        levelId={levelId}
+        fallbackConcept="Condicionales"
+        hintsUsed={hintsUsed}
       >
-        <p className="font-mono text-[11px] uppercase tracking-widest text-accent">
-          Concepto aprendido
-        </p>
-        <p className="mt-1 text-lg font-semibold text-text">Condicionales</p>
-
-        {/* Bloque visual del if */}
-        <div className="mt-4 rounded-xl border border-border bg-code-bg p-4 text-left">
+        {/* Bloque visual del if (identidad del nivel). */}
+        <div className="rounded-xl border border-border bg-code-bg p-4 text-left">
           <pre className="font-mono text-sm leading-relaxed text-text">
             <span className="text-accent">if</span> condición
             <span className="text-muted">:</span>
@@ -124,14 +122,7 @@ export default function ConditionalCompleteScreen({
             <span className="text-muted">ejecutar</span>
           </pre>
         </div>
-
-        <p className="mt-4 text-sm leading-relaxed text-muted">
-          La computadora ejecuta el bloque solo cuando la condición es
-          verdadera.
-        </p>
-
-        <p className="mt-3 text-xs text-muted">Pistas usadas: {hintsUsed}</p>
-      </motion.div>
+      </ConceptMasteryCard>
 
       {/* Acciones */}
       <motion.div

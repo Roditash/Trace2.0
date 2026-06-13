@@ -6,11 +6,13 @@
 // ANIMATION_SYSTEM 8.2: slide + stagger en entrada.
 // ============================================================================
 
+import { motion } from "framer-motion";
 import { RevealGroup, RevealItem } from "@/components/ui/Reveal";
 import WorldCard from "@/components/progression/WorldCard";
 import ProgressBar from "@/components/ui/ProgressBar";
 import { useProgress } from "@/context/ProgressContext";
-import { WORLDS } from "@/lib/progression";
+import { WORLDS, getLevelsForWorld } from "@/lib/progression";
+import { staggerContainer, slideVariants, transition } from "@/lib/motion";
 
 export default function WorldsPage() {
   const { getWorldProgress, completedIds, globalProgress, ready } =
@@ -32,7 +34,7 @@ export default function WorldsPage() {
         </RevealItem>
 
         {/* Progreso global */}
-        <RevealItem className="glass mb-8 mt-4 rounded-2xl border border-glass/10 p-4">
+        <RevealItem className="glass elevation-sm mb-8 mt-4 rounded-2xl border border-glass/10 p-4">
           <div className="mb-2 flex items-center justify-between text-sm">
             <span className="font-medium">Progreso total</span>
             <span className="tabular-nums text-muted">
@@ -42,9 +44,14 @@ export default function WorldsPage() {
           <ProgressBar value={ready ? globalProgress : 0} />
         </RevealItem>
 
-        {/* Lista de mundos */}
+        {/* Lista de mundos — stagger por capas (Motion v3). */}
         <RevealItem>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <motion.div
+            className="grid gap-4 sm:grid-cols-2"
+            variants={staggerContainer()}
+            initial="hidden"
+            animate="visible"
+          >
             {WORLDS.map((world, i) => {
               const prog = ready ? getWorldProgress(world) : 0;
               const done = ready
@@ -60,18 +67,25 @@ export default function WorldsPage() {
                   : false;
 
               return (
-                <WorldCard
+                <motion.div
                   key={world.id}
-                  world={world}
-                  progress={prog}
-                  completedCount={done}
-                  isCompleted={isCompleted}
-                  locked={locked}
-                  unlockedBy={prevWorld?.name}
-                />
+                  variants={slideVariants}
+                  transition={transition.slide}
+                >
+                  <WorldCard
+                    world={world}
+                    levels={getLevelsForWorld(world.id)}
+                    completedIds={completedIds}
+                    progress={prog}
+                    completedCount={done}
+                    isCompleted={isCompleted}
+                    locked={locked}
+                    unlockedBy={prevWorld?.name}
+                  />
+                </motion.div>
               );
             })}
-          </div>
+          </motion.div>
         </RevealItem>
       </RevealGroup>
     </div>

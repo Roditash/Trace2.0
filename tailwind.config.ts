@@ -23,6 +23,7 @@ const config: Config = {
         muted: withVar("--text-muted"),
         accent: withVar("--accent"),
         "accent-strong": withVar("--accent-strong"),
+        "accent-2": withVar("--accent-2"),
         success: withVar("--success"),
         danger: withVar("--danger"),
         "code-bg": withVar("--code-bg"),
@@ -36,6 +37,14 @@ const config: Config = {
       borderRadius: {
         xl: "0.875rem",
         "2xl": "1.125rem",
+        "3xl": "1.5rem",
+      },
+      boxShadow: {
+        // Escala de elevación unificada (tokens --shadow-* de globals.css).
+        sm: "var(--shadow-sm)",
+        md: "var(--shadow-md)",
+        lg: "var(--shadow-lg)",
+        xl: "var(--shadow-xl)",
       },
       maxWidth: {
         content: "72rem",

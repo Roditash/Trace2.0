@@ -83,13 +83,17 @@ import Button from "@/components/ui/Button";
 type Phase = "intro" | "game" | "complete";
 
 // ----------------------------------------------------------------------------
-// Sistema de feedback educativo (FASE PREMIUM).
-// Cuatro estados: correcto (chip/victoria del editor), parcialmente correcto,
-// error conceptual y error de sintaxis básica. El feedback debe sentirse como
-// un mentor, no como un compilador: reconoce el avance, guía el siguiente
-// paso y nunca regala la solución.
+// Sistema de feedback educativo COMÚN (PART 9 — Educational Feedback 2.0).
+// Un único contrato para TODOS los validadores. Cuatro estados, cada uno con
+// una intención de mentor (nunca de compilador):
+//   - success         (éxito): reconoce el logro y nombra QUÉ resolvió.
+//   - partial          (partial_success): vas bien, falta un paso concreto.
+//   - conceptual       (conceptual_error): la idea aún no está; reorienta.
+//   - syntax           (syntax_error): la escritura impide leer la intención.
+// El feedback reconoce el avance, guía el siguiente paso y nunca regala la
+// solución. Cada validador clasifica; este módulo unifica el lenguaje visual.
 // ----------------------------------------------------------------------------
-type FeedbackKind = "partial" | "conceptual" | "syntax";
+type FeedbackKind = "success" | "partial" | "conceptual" | "syntax";
 
 interface Feedback {
   kind: FeedbackKind;
@@ -101,6 +105,12 @@ const FEEDBACK_STYLE: Record<
   FeedbackKind,
   { label: string; box: string; tag: string }
 > = {
+  // Éxito: tono de éxito (verde). "Lo lograste." Reconoce, no solo avisa.
+  success: {
+    label: "Resuelto",
+    box: "border-success/30 bg-success/5 text-text",
+    tag: "text-success",
+  },
   // Parcialmente correcto: tono del acento. "Vas bien, sigue."
   partial: {
     label: "Vas bien",
@@ -221,6 +231,8 @@ export default function GameView({
   const [feedback, setFeedback] = useState<Feedback | null>(null);
 
   // Helpers de mentor: clasifican el mensaje según lo que enseña.
+  const success = (message: string) =>
+    setFeedback({ kind: "success", message });
   const partial = (message: string) =>
     setFeedback({ kind: "partial", message });
   const conceptual = (message: string) =>
@@ -270,10 +282,11 @@ export default function GameView({
     timers.current.push(t);
   };
 
-  // Cualquier feedback no resuelto marca el editor como inválido (feedback
-  // inmediato en el marco/chip del CodeEditor).
+  // El feedback de error (parcial/conceptual/sintaxis) marca el editor como
+  // inválido. El de éxito NO: ese estado lo gobierna la secuencia de victoria
+  // (valid -> completed), para no pisar la animación de cada minijuego.
   useEffect(() => {
-    if (feedback) setEditorStatus("invalid");
+    if (feedback && feedback.kind !== "success") setEditorStatus("invalid");
   }, [feedback]);
 
   // Pistas usadas a efectos de estrellas.
@@ -308,7 +321,9 @@ export default function GameView({
     const result = evaluateCrystalCode(code);
     setRun(result);
     if (result.solved) {
-      clearFeedback();
+      success(
+        "Guardaste la cantidad en una variable y la mostraste. Eso es exactamente lo que hace una variable: recordar un valor para usarlo."
+      );
       setEditorStatus("completed");
       after(900, finishLevel);
       return;
@@ -370,6 +385,9 @@ export default function GameView({
         // ETAPA 4: ACCESO PERMITIDO. Celebración antes de la victoria.
         setDoorState("granted");
         setEditorStatus("completed");
+        success(
+          "La condición fue verdadera y la puerta se abrió. Acabas de tomar una decisión con código: eso es un condicional."
+        );
         after(1700, finishLevel);
       } else {
         // Condición falsa (o falta print OPEN): ACCESO DENEGADO.
@@ -463,6 +481,9 @@ export default function GameView({
     after(loopEnd + 200, () => {
       setLoopState("completed");
       setEditorStatus("completed");
+      success(
+        "El bucle repitió la acción hasta vaciar las monedas y abrió el cofre. Has automatizado algo repetitivo sin reescribirlo."
+      );
     });
     after(loopEnd + 1900, finishLevel);
   };
@@ -531,6 +552,9 @@ export default function GameView({
     after(pathEnd + 200, () => {
       setRobotState("completed");
       setEditorStatus("completed");
+      success(
+        "Definiste la habilidad una sola vez y la reutilizaste para cruzar el camino. Eso es una función: crear algo una vez y usarlo siempre."
+      );
     });
     after(pathEnd + 2000, finishLevel);
   };
@@ -585,6 +609,9 @@ export default function GameView({
     after(sortEnd + 200, () => {
       setMemoryState("completed");
       setEditorStatus("completed");
+      success(
+        "Reuniste las piezas en una lista y las ordenaste. Una lista te deja manejar muchos valores como un solo conjunto."
+      );
     });
     after(sortEnd + 1800, finishLevel);
   };
@@ -747,6 +774,7 @@ export default function GameView({
         >
           {isSecretDoor ? (
             <ConditionalCompleteScreen
+              levelId={levelId}
               levelName={level.name}
               stars={earnedStars}
               hintsUsed={usedHints}
@@ -756,6 +784,7 @@ export default function GameView({
             />
           ) : isTreasureLoop ? (
             <LoopCompleteScreen
+              levelId={levelId}
               levelName={level.name}
               stars={earnedStars}
               hintsUsed={usedHints}
@@ -765,6 +794,7 @@ export default function GameView({
             />
           ) : isRobotPath ? (
             <FunctionCompleteScreen
+              levelId={levelId}
               levelName={level.name}
               stars={earnedStars}
               hintsUsed={usedHints}
@@ -774,6 +804,7 @@ export default function GameView({
             />
           ) : isMemoryPuzzle ? (
             <ListCompleteScreen
+              levelId={levelId}
               levelName={level.name}
               stars={earnedStars}
               hintsUsed={usedHints}
@@ -783,6 +814,7 @@ export default function GameView({
             />
           ) : (
             <LevelCompleteScreen
+              levelId={levelId}
               levelName={level.name}
               concept={level.concept}
               stars={earnedStars}
@@ -901,7 +933,7 @@ export default function GameView({
               {/* Enunciado del reto */}
               <section
                 aria-label="Enunciado"
-                className="glass rounded-2xl border border-glass/10 p-5"
+                className="glass rounded-2xl border border-glass/10 p-5 elevation-sm"
               >
                 <p className="font-mono text-[11px] uppercase tracking-widest text-muted">
                   Reto
@@ -942,7 +974,7 @@ export default function GameView({
                         "mt-3 rounded-xl border px-3.5 py-3 text-sm",
                         FEEDBACK_STYLE[feedback.kind].box,
                       ].join(" ")}
-                      role="alert"
+                      role={feedback.kind === "success" ? "status" : "alert"}
                     >
                       <p
                         className={[

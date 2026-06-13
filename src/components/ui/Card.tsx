@@ -7,7 +7,7 @@
 // ============================================================================
 
 import { motion, type HTMLMotionProps } from "framer-motion";
-import { distance, scale, transition } from "@/lib/motion";
+import { hoverLift, scale, transition } from "@/lib/motion";
 
 interface CardProps extends Omit<HTMLMotionProps<"div">, "ref"> {
   interactive?: boolean;
@@ -24,20 +24,18 @@ export default function Card({
   return (
     <motion.div
       className={[
-        "glass rounded-2xl border p-5",
+        "glass rounded-2xl border p-5 elevation-sm",
         selected ? "border-accent" : "border-glass/10",
         interactive ? "cursor-pointer" : "",
-        // Hover: el lift (y:-2) ya comunica elevación; el borde sube apenas.
-        // Sin sombras agresivas adicionales (la sombra vive en .glass).
-        interactive ? "[@media(hover:hover)]:hover:border-glass/20" : "",
-        "transition-colors",
+        // Hover: el lift (y:-2) comunica elevación; el borde y la sombra suben
+        // una sola capa (hover:shadow-lg). Sin sombras agresivas. Puntero fino.
+        interactive
+          ? "[@media(hover:hover)]:hover:border-glass/20 [@media(hover:hover)]:hover:shadow-lg"
+          : "",
+        "transition-[border-color,box-shadow] duration-200",
         className,
       ].join(" ")}
-      whileHover={
-        interactive
-          ? { y: -distance.xs / 2, transition: transition.micro }
-          : undefined
-      }
+      whileHover={interactive ? hoverLift : undefined}
       whileTap={interactive ? { scale: scale.pressed } : undefined}
       transition={transition.press}
       {...props}

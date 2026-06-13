@@ -23,8 +23,10 @@ import {
 } from "@/lib/motion";
 import StarRating from "@/components/game/StarRating";
 import Button from "@/components/ui/Button";
+import ConceptMasteryCard from "@/components/game/ConceptMasteryCard";
 
 interface FunctionCompleteScreenProps {
+  levelId: number;
   levelName: string;
   stars: number;
   hintsUsed: number;
@@ -42,6 +44,7 @@ function starMessage(stars: number): string {
 }
 
 export default function FunctionCompleteScreen({
+  levelId,
   levelName,
   stars,
   hintsUsed,
@@ -116,26 +119,14 @@ export default function FunctionCompleteScreen({
         {starMessage(stars)}
       </motion.p>
 
-      {/* Concepto aprendido: explicación visual de la función (recompensa) */}
-      <motion.div
-        variants={slideVariants}
-        transition={transition.slide}
-        className="glass-elevated mt-6 w-full rounded-2xl border p-5"
-        style={{
-          borderColor: "rgb(46 229 157 / 0.3)",
-          background: "rgb(46 229 157 / 0.05)",
-        }}
+      {/* Concepto dominado: ENSEÑA "Has aprendido a ___" + visual del def. */}
+      <ConceptMasteryCard
+        levelId={levelId}
+        fallbackConcept="Funciones"
+        hintsUsed={hintsUsed}
       >
-        <p
-          className="font-mono text-[11px] uppercase tracking-widest"
-          style={{ color: ACCENT }}
-        >
-          Concepto aprendido
-        </p>
-        <p className="mt-1 text-lg font-semibold text-text">Funciones</p>
-
-        {/* Bloque visual de la definición de función */}
-        <div className="mt-4 rounded-xl border border-border bg-code-bg p-4 text-left">
+        {/* Bloque visual de la definición de función (identidad del nivel). */}
+        <div className="rounded-xl border border-border bg-code-bg p-4 text-left">
           <pre className="font-mono text-sm leading-relaxed text-text">
             <span style={{ color: ACCENT }}>def</span> move()
             <span className="text-muted">:</span>
@@ -146,14 +137,7 @@ export default function FunctionCompleteScreen({
             <span className="text-muted">)</span>
           </pre>
         </div>
-
-        <p className="mt-4 text-sm leading-relaxed text-muted">
-          Las funciones permiten guardar acciones y reutilizarlas cuando las
-          necesites.
-        </p>
-
-        <p className="mt-3 text-xs text-muted">Pistas usadas: {hintsUsed}</p>
-      </motion.div>
+      </ConceptMasteryCard>
 
       {/* Acciones */}
       <motion.div
