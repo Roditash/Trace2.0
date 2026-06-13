@@ -13,8 +13,10 @@ import Card from "@/components/ui/Card";
 import ProgressBar from "@/components/ui/ProgressBar";
 import Button from "@/components/ui/Button";
 import ProgressDashboard from "@/components/progression/ProgressDashboard";
+import ConceptIcon from "@/components/ui/ConceptIcon";
 import { useProgress } from "@/context/ProgressContext";
 import { WORLDS } from "@/lib/progression";
+import { getConcept, iconForConcept } from "@/lib/concepts";
 
 export default function ProfilePage() {
   const {
@@ -126,17 +128,33 @@ export default function ProfilePage() {
         </Card>
       </RevealItem>
 
-      {/* Siguiente nivel sugerido */}
+      {/* Siguiente nivel sugerido (próximo objetivo del recorrido) */}
       {ready && nextLevel && (
         <RevealItem className="mt-4">
           <Card className="!border-accent/30 !bg-accent/5">
-            <p className="text-xs font-medium uppercase tracking-wide text-accent">
-              Continuar
-            </p>
-            <h2 className="mt-1 font-semibold">{nextLevel.level.name}</h2>
-            <p className="mt-0.5 text-sm text-muted">
-              {nextLevel.world.name} · {nextLevel.level.concept}
-            </p>
+            <div className="flex items-start gap-3">
+              <span
+                aria-hidden
+                className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-accent/10 text-accent ring-1 ring-inset ring-accent/20"
+              >
+                <ConceptIcon
+                  name={
+                    getConcept(nextLevel.level.id)?.icon ??
+                    iconForConcept(nextLevel.level.concept)
+                  }
+                  className="h-5 w-5"
+                />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-medium uppercase tracking-wide text-accent">
+                  Próximo objetivo
+                </p>
+                <h2 className="mt-1 font-semibold">{nextLevel.level.name}</h2>
+                <p className="mt-0.5 text-sm text-muted">
+                  {nextLevel.world.name} · {nextLevel.level.concept}
+                </p>
+              </div>
+            </div>
             <div className="mt-4">
               <Link href={`/worlds/${nextLevel.world.id}`}>
                 <Button size="md">Ir al nivel</Button>

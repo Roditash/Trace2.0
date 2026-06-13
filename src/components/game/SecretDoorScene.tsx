@@ -19,7 +19,7 @@
 // ============================================================================
 
 import { AnimatePresence, motion } from "framer-motion";
-import { transition, spring } from "@/lib/motion";
+import { transition, spring, stagger } from "@/lib/motion";
 
 // Estados visuales (nombres de la spec Fase 7).
 export type DoorState =

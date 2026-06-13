@@ -16,8 +16,10 @@ import {
 } from "@/lib/motion";
 import StarRating from "@/components/game/StarRating";
 import Button from "@/components/ui/Button";
+import ConceptMasteryCard from "@/components/game/ConceptMasteryCard";
 
 interface LevelCompleteScreenProps {
+  levelId: number;
   levelName: string;
   concept: string;
   stars: number;
@@ -34,6 +36,7 @@ function starMessage(stars: number): string {
 }
 
 export default function LevelCompleteScreen({
+  levelId,
   levelName,
   concept,
   stars,
@@ -103,20 +106,12 @@ export default function LevelCompleteScreen({
         {starMessage(stars)}
       </motion.p>
 
-      {/* Concepto aprendido */}
-      <motion.div
-        variants={slideVariants}
-        transition={transition.slide}
-        className="glass-elevated mt-6 w-full rounded-2xl border border-glass/10 p-5"
-      >
-        <p className="font-mono text-[11px] uppercase tracking-widest text-muted">
-          Concepto aprendido
-        </p>
-        <p className="mt-2 text-base font-medium text-text">{concept}</p>
-        <p className="mt-1 text-xs text-muted">
-          Pistas usadas: {hintsUsed}
-        </p>
-      </motion.div>
+      {/* Concepto dominado: momento que ENSEÑA, no que celebra (PART 3). */}
+      <ConceptMasteryCard
+        levelId={levelId}
+        fallbackConcept={concept}
+        hintsUsed={hintsUsed}
+      />
 
       {/* Acciones */}
       <motion.div

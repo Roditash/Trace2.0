@@ -22,8 +22,10 @@ import {
 } from "@/lib/motion";
 import StarRating from "@/components/game/StarRating";
 import Button from "@/components/ui/Button";
+import ConceptMasteryCard from "@/components/game/ConceptMasteryCard";
 
 interface ListCompleteScreenProps {
+  levelId: number;
   levelName: string;
   stars: number;
   hintsUsed: number;
@@ -41,6 +43,7 @@ function starMessage(stars: number): string {
 }
 
 export default function ListCompleteScreen({
+  levelId,
   levelName,
   stars,
   hintsUsed,
@@ -117,54 +120,39 @@ export default function ListCompleteScreen({
         {starMessage(stars)}
       </motion.p>
 
-      {/* Concepto aprendido: lista ordenada (recompensa) */}
-      <motion.div
-        variants={slideVariants}
-        transition={transition.slide}
-        className="glass-elevated mt-6 w-full rounded-2xl border p-5"
-        style={{
-          borderColor: "rgb(129 140 248 / 0.3)",
-          background: "rgb(129 140 248 / 0.05)",
-        }}
+      {/* Concepto dominado: ENSEÑA "Has aprendido a ___" + lista ordenada. */}
+      <ConceptMasteryCard
+        levelId={levelId}
+        fallbackConcept="Listas"
+        hintsUsed={hintsUsed}
       >
-        <p
-          className="font-mono text-[11px] uppercase tracking-widest"
-          style={{ color: INDIGO }}
-        >
-          Concepto aprendido
-        </p>
-        <p className="mt-1 text-lg font-semibold text-text">Listas</p>
-
-        {/* Visual: las celdas ordenadas con su índice */}
-        <div className="mt-4 flex items-end justify-center gap-2">
-          {solved.map((value, i) => (
-            <div key={i} className="flex flex-col items-center gap-1">
-              <span
-                className="grid h-11 w-11 place-items-center rounded-xl border font-mono text-lg font-bold"
-                style={{
-                  color: INDIGO,
-                  borderColor: "rgb(129 140 248 / 0.5)",
-                  background: "rgb(129 140 248 / 0.12)",
-                }}
-              >
-                {value}
-              </span>
-              <span className="font-mono text-[10px] text-muted">{i}</span>
-            </div>
-          ))}
+        {/* Visual: las celdas ordenadas con su índice (identidad del nivel). */}
+        <div className="rounded-xl border border-border bg-code-bg p-4">
+          <div className="flex items-end justify-center gap-2">
+            {solved.map((value, i) => (
+              <div key={i} className="flex flex-col items-center gap-1">
+                <span
+                  className="grid h-11 w-11 place-items-center rounded-xl border font-mono text-lg font-bold"
+                  style={{
+                    color: INDIGO,
+                    borderColor: "rgb(129 140 248 / 0.5)",
+                    background: "rgb(129 140 248 / 0.12)",
+                  }}
+                >
+                  {value}
+                </span>
+                <span className="font-mono text-[10px] text-muted">{i}</span>
+              </div>
+            ))}
+          </div>
+          <p
+            className="mt-4 text-center font-mono text-sm"
+            style={{ color: INDIGO }}
+          >
+            pieces = [1, 2, 3, 4]
+          </p>
         </div>
-
-        <p className="mt-4 font-mono text-sm" style={{ color: INDIGO }}>
-          pieces = [1, 2, 3, 4]
-        </p>
-
-        <p className="mt-4 text-sm leading-relaxed text-muted">
-          Una lista guarda varios valores juntos y te permite organizarlos y
-          acceder a ellos por su posición.
-        </p>
-
-        <p className="mt-3 text-xs text-muted">Pistas usadas: {hintsUsed}</p>
-      </motion.div>
+      </ConceptMasteryCard>
 
       {/* Acciones */}
       <motion.div

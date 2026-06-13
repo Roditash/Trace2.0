@@ -22,7 +22,7 @@ import {
   computeLevelStatuses,
   WORLDS,
 } from "@/lib/progression";
-import { transition } from "@/lib/motion";
+import { transition, staggerContainer, slideVariants } from "@/lib/motion";
 
 export default function WorldDetailView({ id }: { id: string }) {
   const world = getWorld(id);
@@ -103,7 +103,7 @@ export default function WorldDetailView({ id }: { id: string }) {
         {/* Empty state: mundo aún no iniciado. Mensaje + acción + motivación. */}
         {worldNotStarted && firstAvailable && (
           <RevealItem className="mt-6">
-            <div className="glass rounded-2xl border border-accent/20 p-5">
+            <div className="glass rounded-2xl border border-accent/20 p-5 elevation-md">
               <p className="text-xs font-medium uppercase tracking-wide text-accent">
                 Tu primer reto
               </p>
@@ -134,13 +134,26 @@ export default function WorldDetailView({ id }: { id: string }) {
           </h2>
 
           <div className="relative">
-            {/* Línea conectora vertical */}
+            {/* Línea conectora vertical (carril base + relleno de progreso). */}
             <div
               aria-hidden
-              className="absolute left-[23px] top-6 bottom-6 w-0.5 bg-border"
+              className="absolute left-[23px] top-6 bottom-6 w-0.5 rounded-full bg-border"
+            />
+            <motion.div
+              aria-hidden
+              className="absolute left-[23px] top-6 w-0.5 origin-top rounded-full bg-gradient-to-b from-accent to-accent/40"
+              style={{ bottom: 24 }}
+              initial={{ scaleY: 0 }}
+              animate={{ scaleY: progress / 100 }}
+              transition={transition.progress}
             />
 
-            <div className="relative space-y-1">
+            <motion.div
+              className="relative space-y-1"
+              variants={staggerContainer()}
+              initial="hidden"
+              animate="visible"
+            >
               {levels.map((level, i) => {
                 const status = statuses[level.id] ?? "locked";
                 const isNextAvailable =
@@ -164,7 +177,8 @@ export default function WorldDetailView({ id }: { id: string }) {
                         ? "bg-surface-2"
                         : "bg-transparent",
                     ].join(" ")}
-                    // 5.21: al desbloquearse, el nodo aparece con énfasis
+                    // Reveal con stagger (5.10) + énfasis al desbloquear (5.21).
+                    variants={slideVariants}
                     layout
                     transition={transition.slide}
                   >
@@ -178,7 +192,7 @@ export default function WorldDetailView({ id }: { id: string }) {
                   </motion.div>
                 );
               })}
-            </div>
+            </motion.div>
           </div>
         </RevealItem>
       </RevealGroup>

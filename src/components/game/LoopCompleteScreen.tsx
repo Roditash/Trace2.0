@@ -22,8 +22,10 @@ import {
 } from "@/lib/motion";
 import StarRating from "@/components/game/StarRating";
 import Button from "@/components/ui/Button";
+import ConceptMasteryCard from "@/components/game/ConceptMasteryCard";
 
 interface LoopCompleteScreenProps {
+  levelId: number;
   levelName: string;
   stars: number;
   hintsUsed: number;
@@ -43,6 +45,7 @@ function starMessage(stars: number): string {
 }
 
 export default function LoopCompleteScreen({
+  levelId,
   levelName,
   stars,
   hintsUsed,
@@ -117,26 +120,14 @@ export default function LoopCompleteScreen({
         {starMessage(stars)}
       </motion.p>
 
-      {/* Concepto aprendido: explicación visual del while (mínima, recompensa) */}
-      <motion.div
-        variants={slideVariants}
-        transition={transition.slide}
-        className="glass-elevated mt-6 w-full rounded-2xl border p-5"
-        style={{
-          borderColor: "rgba(251,191,36,0.3)",
-          background: "rgba(251,191,36,0.05)",
-        }}
+      {/* Concepto dominado: ENSEÑA "Has aprendido a ___" + visual del while. */}
+      <ConceptMasteryCard
+        levelId={levelId}
+        fallbackConcept="Bucles"
+        hintsUsed={hintsUsed}
       >
-        <p
-          className="font-mono text-[11px] uppercase tracking-widest"
-          style={{ color: GOLD_DEEP }}
-        >
-          Concepto aprendido
-        </p>
-        <p className="mt-1 text-lg font-semibold text-text">Bucles</p>
-
-        {/* Bloque visual del while */}
-        <div className="mt-4 rounded-xl border border-border bg-code-bg p-4 text-left">
+        {/* Bloque visual del while (identidad del nivel, tema dorado). */}
+        <div className="rounded-xl border border-border bg-code-bg p-4 text-left">
           <pre className="font-mono text-sm leading-relaxed text-text">
             <span style={{ color: GOLD_LIGHT }}>while</span> condición
             <span className="text-muted">:</span>
@@ -145,13 +136,7 @@ export default function LoopCompleteScreen({
             <span className="text-muted">repetir</span>
           </pre>
         </div>
-
-        <p className="mt-4 text-sm leading-relaxed text-muted">
-          Repetir acciones hasta que la condición deje de cumplirse.
-        </p>
-
-        <p className="mt-3 text-xs text-muted">Pistas usadas: {hintsUsed}</p>
-      </motion.div>
+      </ConceptMasteryCard>
 
       {/* Acciones */}
       <motion.div

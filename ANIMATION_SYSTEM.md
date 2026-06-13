@@ -417,6 +417,35 @@ revealParent   = { visible: { transition: { staggerChildren: stagger.normal } } 
 Regla: no se crean variants nuevas si una existente cubre el caso. Las nuevas
 variants se añaden a este documento antes de usarse.
 
+### 6.9 Helpers de composición (Motion v3)
+
+Añadidos en la fase Premium. NO introducen duraciones, curvas ni distancias
+nuevas: solo **combinan** los tokens ya aprobados (secciones 6.1–6.6). Son la
+forma preferida de aplicar stagger y hover de forma consistente.
+
+```
+staggerContainer(each = stagger.normal, delayChildren = 0)
+  -> Variants de contenedor. staggerChildren = each, delayChildren = delay.
+     Respeta el límite de 8 hijos simultáneos (sección 11.2).
+
+hoverLift
+  -> { y: -2, transition: { duration: duration.micro, ease: ease.standard } }
+     Gesto único de elevación para cards/superficies interactivas (sección 5.5
+     / 5.15). La sombra sube de capa por CSS (token --shadow-*). Solo puntero
+     fino.
+
+emphasisPulse
+  -> { scale: [1, scale.hover, 1], transition: { duration: duration.large,
+       ease: ease.standard } }
+     Un solo pulso de énfasis (sin loop) para "respuesta correcta" o un hito
+     recién desbloqueado (secciones 9.1 / 9.3 / 9.4).
+```
+
+Regla de elevación visual: la profundidad de una superficie nace de la SUMA de
+una sombra de contacto cercana y una ambiental lejana (tokens `--shadow-sm/md/
+lg/xl` en CSS), nunca de una sola sombra dura. El hover sube exactamente una
+capa de elevación (p. ej. md -> lg), nunca más.
+
 ---
 
 ## 7. Comportamiento de componentes

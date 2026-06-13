@@ -35,7 +35,7 @@ export default function HintPanel({
   return (
     <section
       aria-label="Pistas"
-      className="glass rounded-2xl border border-glass/10 p-5"
+      className="glass rounded-2xl border border-glass/10 p-5 elevation-sm"
     >
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-sm font-semibold">Pistas</h2>

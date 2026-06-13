@@ -91,7 +91,7 @@ export default function CodeEditor({
 
   return (
     <div
-      className={`overflow-hidden rounded-2xl border bg-code-bg transition-[border-color,box-shadow] duration-200 ${FRAME[status]}`}
+      className={`overflow-hidden rounded-2xl border bg-code-bg transition-[border-color,box-shadow] duration-200 ${status === "idle" ? "elevation-md " : ""}${FRAME[status]}`}
     >
       {/* Barra de título del editor (estilo VS Code minimal) */}
       <div className="flex items-center justify-between border-b border-border px-4 py-2.5">

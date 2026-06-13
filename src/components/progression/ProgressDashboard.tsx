@@ -19,8 +19,11 @@ import {
   slideVariants,
   transition,
   spring,
+  hoverLift,
 } from "@/lib/motion";
-import { LEVELS, WORLDS } from "@/lib/progression";
+import { LEVELS, WORLDS, getLevel } from "@/lib/progression";
+import { getConcept, iconForConcept } from "@/lib/concepts";
+import ConceptIcon from "@/components/ui/ConceptIcon";
 import { useProgress } from "@/context/ProgressContext";
 
 // Máximos derivados de la fuente de verdad (progression.ts).
@@ -84,18 +87,25 @@ function Metric({
   max,
   title,
   detail,
+  emphasis = false,
 }: {
   value: number;
   max: number;
   title: string;
   detail: string;
+  /** Resalta la métrica como un logro destacado (estrellas). */
+  emphasis?: boolean;
 }) {
   return (
     <motion.div
       variants={slideVariants}
       transition={transition.slide}
-      className="glass flex items-center gap-4 rounded-2xl border border-glass/10 p-4"
-      whileHover={{ y: -2, transition: transition.micro }}
+      className={[
+        "glass flex items-center gap-4 rounded-2xl border p-4 elevation-sm transition-[border-color,box-shadow] duration-200",
+        emphasis ? "border-accent/30" : "border-glass/10",
+        "[@media(hover:hover)]:hover:shadow-lg",
+      ].join(" ")}
+      whileHover={hoverLift}
     >
       <Ring value={value} max={max} label={`${value}`} />
       <div className="min-w-0">
@@ -107,80 +117,77 @@ function Metric({
 }
 
 // ---------------------------------------------------------------------------
-// Insignia de concepto aprendido
+// Insignia de concepto aprendido (con identidad: icono + frase que ENSEÑA)
 // ---------------------------------------------------------------------------
-function ConceptBadge({
-  concept,
-  levelName,
-  earned,
-}: {
-  concept: string;
-  levelName: string;
-  earned: boolean;
-}) {
+function ConceptBadge({ levelId, earned }: { levelId: number; earned: boolean }) {
+  const level = getLevel(levelId);
+  const meta = getConcept(levelId); // identidad rica (Python 1-5)
+  const title = meta?.title ?? level?.concept ?? "";
+  const icon = meta?.icon ?? iconForConcept(level?.concept ?? "");
+  // Línea secundaria: para conceptos con identidad, la frase que enseña.
+  const detail = earned && meta ? meta.teaches : level?.name ?? "";
+
   return (
     <motion.li
       variants={slideVariants}
       transition={transition.slide}
       className={[
-        "flex items-center gap-3 rounded-xl border px-3 py-2.5 transition-colors",
+        "flex items-start gap-3 rounded-xl border px-3 py-2.5 transition-colors",
         earned
           ? "border-accent/30 bg-accent/5"
-          : "border-border bg-surface-2/40 opacity-60",
+          : "border-border bg-surface-2/40 opacity-70",
       ].join(" ")}
     >
       <span
         aria-hidden
         className={[
-          "grid h-7 w-7 shrink-0 place-items-center rounded-full border",
+          "relative grid h-9 w-9 shrink-0 place-items-center rounded-xl border",
           earned
-            ? "border-accent/50 bg-accent/10"
-            : "border-border bg-surface-2",
+            ? "border-accent/40 bg-accent/10 text-accent"
+            : "border-border bg-surface-2 text-muted",
         ].join(" ")}
       >
-        {earned ? (
-          <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5">
-            <motion.path
-              d="M5 13l4 4L19 7"
-              stroke="rgb(var(--accent))"
-              strokeWidth={2.5}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              initial={{ pathLength: 0 }}
-              animate={{ pathLength: 1 }}
-              transition={spring.snappy}
-            />
-          </svg>
-        ) : (
-          <svg viewBox="0 0 24 24" fill="none" className="h-3 w-3 opacity-50">
-            <rect
-              x="5"
-              y="11"
-              width="14"
-              height="10"
-              rx="2"
-              stroke="currentColor"
-              strokeWidth="1.5"
-            />
-            <path
-              d="M8 11V7a4 4 0 1 1 8 0v4"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          </svg>
+        <ConceptIcon name={icon} className="h-4 w-4" />
+        {earned && (
+          <span className="absolute -bottom-1 -right-1 grid h-4 w-4 place-items-center rounded-full bg-accent text-bg">
+            <svg viewBox="0 0 24 24" fill="none" className="h-2.5 w-2.5">
+              <motion.path
+                d="M5 13l4 4L19 7"
+                stroke="currentColor"
+                strokeWidth={3}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={spring.snappy}
+              />
+            </svg>
+          </span>
         )}
       </span>
-      <div className="min-w-0">
+      <div className="min-w-0 pt-0.5">
         <p
           className={[
-            "truncate text-sm font-medium",
+            "truncate text-sm font-semibold",
             earned ? "text-text" : "text-muted",
           ].join(" ")}
         >
-          {concept}
+          {title}
         </p>
-        <p className="truncate text-[11px] text-muted">{levelName}</p>
+        <p
+          className={[
+            "mt-0.5 text-[11px] leading-snug",
+            earned ? "text-muted" : "text-muted/80",
+          ].join(" ")}
+        >
+          {earned && meta ? (
+            <>
+              Has aprendido a <span className="text-text/80">{detail}</span>
+            </>
+          ) : (
+            detail
+          )}
+        </p>
       </div>
     </motion.li>
   );
@@ -190,11 +197,16 @@ function ConceptBadge({
 // Dashboard
 // ---------------------------------------------------------------------------
 export default function ProgressDashboard() {
-  const { ready, completedIds, totalStars, completedWorldCount } =
+  const { ready, completedIds, totalStars, completedWorldCount, nextLevel } =
     useProgress();
 
   const completedCount = ready ? completedIds.size : 0;
   const conceptsLearned = LEVELS.filter((l) => completedIds.has(l.id));
+
+  // "Próximo objetivo": el siguiente nivel disponible y su concepto.
+  const nextConcept = nextLevel ? getConcept(nextLevel.level.id) : undefined;
+  const nextTitle =
+    nextConcept?.title ?? nextLevel?.level.concept ?? null;
 
   return (
     <motion.section
@@ -204,6 +216,43 @@ export default function ProgressDashboard() {
       animate="visible"
       className="flex flex-col gap-6"
     >
+      {/* Learning Journey: resumen del recorrido (conceptos + próximo objetivo) */}
+      <motion.div
+        variants={slideVariants}
+        transition={transition.slide}
+        className="glass-elevated relative overflow-hidden rounded-2xl border border-glass/10 p-5 elevation-md"
+      >
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-accent/10 blur-3xl"
+        />
+        <div className="relative">
+          <p className="font-mono text-[11px] uppercase tracking-widest text-accent">
+            Tu recorrido
+          </p>
+          <h2 className="mt-1 text-xl font-semibold tracking-tight">
+            {conceptsLearned.length === 0
+              ? "Empieza a dominar conceptos"
+              : `${conceptsLearned.length} concepto${
+                  conceptsLearned.length !== 1 ? "s" : ""
+                } dominado${conceptsLearned.length !== 1 ? "s" : ""}`}
+          </h2>
+          <p className="mt-1 text-sm leading-relaxed text-muted">
+            {ready && nextTitle ? (
+              <>
+                Próximo objetivo:{" "}
+                <span className="font-medium text-text">{nextTitle}</span>
+                {nextLevel ? ` · ${nextLevel.world.name}` : ""}
+              </>
+            ) : completedCount > 0 ? (
+              "Has recorrido todos los conceptos disponibles. Domínalos sin pistas para las tres estrellas."
+            ) : (
+              "Cada nivel desbloquea una habilidad de pensamiento que se queda contigo."
+            )}
+          </p>
+        </div>
+      </motion.div>
+
       {/* Métricas principales con anillos */}
       <div className="grid gap-3 sm:grid-cols-3">
         <Metric
@@ -217,6 +266,7 @@ export default function ProgressDashboard() {
           max={MAX_STARS}
           title="Estrellas"
           detail={`${ready ? totalStars : 0} de ${MAX_STARS} posibles`}
+          emphasis
         />
         <Metric
           value={ready ? completedWorldCount : 0}
@@ -230,7 +280,7 @@ export default function ProgressDashboard() {
       <motion.div
         variants={slideVariants}
         transition={transition.slide}
-        className="glass rounded-2xl border border-glass/10 p-5"
+        className="glass rounded-2xl border border-glass/10 p-5 elevation-sm"
       >
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-sm font-semibold">Conceptos aprendidos</h2>
@@ -251,16 +301,21 @@ export default function ProgressDashboard() {
               problemas. Completa tu primer nivel y gana tu primera insignia.
             </p>
             <div className="mt-3 flex flex-wrap gap-1.5" aria-hidden>
-              {["Variables", "Condicionales", "Bucles", "Funciones", "Listas"].map(
-                (c) => (
-                  <span
-                    key={c}
-                    className="rounded-md bg-surface-2/70 px-2 py-1 text-[11px] text-muted"
-                  >
-                    {c}
-                  </span>
-                )
-              )}
+              {[
+                { t: "Variables", i: "variable" as const },
+                { t: "Condicionales", i: "conditional" as const },
+                { t: "Bucles", i: "loop" as const },
+                { t: "Funciones", i: "function" as const },
+                { t: "Listas", i: "list" as const },
+              ].map((c) => (
+                <span
+                  key={c.t}
+                  className="flex items-center gap-1.5 rounded-md bg-surface-2/70 px-2 py-1 text-[11px] text-muted ring-1 ring-inset ring-border/60"
+                >
+                  <ConceptIcon name={c.i} className="h-3.5 w-3.5" />
+                  {c.t}
+                </span>
+              ))}
             </div>
           </div>
         ) : (
@@ -273,8 +328,7 @@ export default function ProgressDashboard() {
             {LEVELS.map((level) => (
               <ConceptBadge
                 key={level.id}
-                concept={level.concept}
-                levelName={level.name}
+                levelId={level.id}
                 earned={completedIds.has(level.id)}
               />
             ))}

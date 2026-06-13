@@ -104,3 +104,44 @@ export const pageVariants: Variants = {
   visible: { opacity: 1, y: 0 },
   exit: { opacity: 0, y: -distance.sm },
 };
+
+// ============================================================================
+// Motion v3 (PART 4) — helpers de stagger y hover unificados.
+// Documentados en ANIMATION_SYSTEM.md sección 6.9. Construidos SOLO con los
+// tokens existentes (duraciones, easing, stagger, distancias). No introducen
+// nuevas duraciones ni curvas: solo combinan las ya aprobadas.
+// ============================================================================
+
+/**
+ * Contenedor de stagger parametrizable. Reutiliza staggerChildren y permite un
+ * pequeño delayChildren para que la cabecera entre antes que la lista.
+ * Mantiene el límite de la sección 11.2 (máximo 8 hijos simultáneos).
+ */
+export function staggerContainer(
+  each: number = stagger.normal,
+  delayChildren: number = 0
+): Variants {
+  return {
+    hidden: {},
+    visible: {
+      transition: { staggerChildren: each, delayChildren },
+    },
+  };
+}
+
+/**
+ * Elevación de hover unificada (cards/superficies interactivas). Un único
+ * gesto: y:-2 + sombra que sube de capa. Solo con puntero fino (los
+ * componentes aplican whileHover dentro de [@media(hover:hover)]).
+ */
+export const hoverLift = {
+  y: -distance.xs / 2, // -2px
+  transition: { duration: duration.micro, ease: ease.standard },
+} as const;
+
+// Preset de énfasis discreto (un solo pulso, sin loop): pasar de 1 a scale.hover
+// y volver. Para "respuesta correcta" o un hito recién desbloqueado.
+export const emphasisPulse = {
+  scale: [1, scale.hover, 1],
+  transition: { duration: duration.large, ease: ease.standard },
+} as const;
