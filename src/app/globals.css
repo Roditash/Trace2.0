@@ -1,0 +1,219 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   Trace - Estilos globales
+   Sistema de color sobrio inspirado en Linear / Raycast / Framer / Arc.
+   Tokens expuestos como variables CSS; Tailwind los consume via theme.
+   ========================================================================== */
+
+:root {
+  /* Tema claro */
+  --bg: 250 250 251;
+  --surface: 255 255 255;
+  --surface-2: 244 244 246;
+  --border: 226 226 231;
+  --text: 23 23 28;
+  --text-muted: 110 110 122;
+  --accent: 13 165 122;
+  --accent-strong: 8 130 96;
+  --success: 16 185 129;
+  --danger: 244 63 94;
+  --code-bg: 244 244 246;
+  --star: 234 179 8;
+  /* Borde/reflejo del lenguaje de cristal (oscuro sobre tema claro) */
+  --glass-edge: 23 23 28;
+}
+
+.dark {
+  /* Tema oscuro (predeterminado del producto) */
+  --bg: 10 12 14;
+  --surface: 18 21 24;
+  --surface-2: 24 28 32;
+  --border: 38 44 50;
+  --text: 237 240 242;
+  --text-muted: 148 158 165;
+  /* Verde neón teal (inspiración AlgoMaster) */
+  --accent: 46 229 157;
+  --accent-strong: 30 200 135;
+  --success: 46 229 157;
+  --danger: 251 113 133;
+  --code-bg: 13 16 19;
+  --star: 250 204 21;
+  /* Borde/reflejo del lenguaje de cristal (claro sobre tema oscuro) */
+  --glass-edge: 255 255 255;
+}
+
+* {
+  border-color: rgb(var(--border));
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  background-color: rgb(var(--bg));
+  /* Capa ambiental sutil (Linear/Arc): da profundidad y alimenta el blur de
+     las superficies de cristal. Solo gradientes, costo de render mínimo. */
+  background-image: radial-gradient(
+      60rem 42rem at 85% -10%,
+      rgb(var(--accent) / 0.06),
+      transparent 60%
+    ),
+    radial-gradient(
+      52rem 36rem at -12% 28%,
+      rgb(99 102 241 / 0.05),
+      transparent 62%
+    );
+  background-repeat: no-repeat;
+  /* Nota: sin background-attachment fixed (jank de scroll en iOS Safari). */
+  color: rgb(var(--text));
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Foco visible y de alto contraste (ANIMATION_SYSTEM 5.9 / 11.3) */
+:focus-visible {
+  outline: 2px solid rgb(var(--accent));
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--border));
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Respeto del SO a movimiento reducido. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Mismo efecto cuando el usuario activa "Reducir animaciones" en Ajustes
+   (SettingsContext aplica data-reduced-motion al <html>). Cubre las
+   animaciones CSS puras que Framer/MotionConfig no controla. */
+[data-reduced-motion="true"] *,
+[data-reduced-motion="true"] *::before,
+[data-reduced-motion="true"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Los tokens de color (text-muted, bg-surface, bg-surface-2, etc.) son
+   generados directamente por Tailwind desde tailwind.config.ts. */
+
+@layer utilities {
+  /* Glow sutil del acento (nodos, elementos activos). Inspiración neón. */
+  .glow-accent {
+    box-shadow: 0 0 0 1px rgb(var(--accent) / 0.5),
+      0 0 12px rgb(var(--accent) / 0.35);
+  }
+  .text-glow {
+    text-shadow: 0 0 8px rgb(var(--accent) / 0.45);
+  }
+
+  /* ==========================================================================
+     Lenguaje de cristal v2 (refinado: iOS/visionOS/Linear, elevación por capas).
+     JERARQUÍA DE CAPAS (de menor a mayor elevación):
+       .glass-subtle  -> superficies secundarias dentro de otras superficies
+                         (filas, sub-paneles). Sin sombra exterior.
+       .glass         -> capa base: cards, paneles, secciones de contenido.
+       .glass-elevated-> capa flotante: modales, pantallas de victoria,
+                         diálogos. Más blur, más cuerpo, sombra más profunda
+                         pero difusa (nunca agresiva).
+       .glass-bar     -> barras fijas (navbar). Blur alto, fondo del lienzo.
+     REGLAS DE USO:
+       - Solo en superficies de UI estáticas: cards, paneles, barras.
+       - Nunca dentro de las escenas de minijuego ni en elementos con
+         animación continua (rendimiento).
+       - El borde se aplica con Tailwind: `border border-glass/10`.
+       - Sombras siempre difusas y de baja opacidad; la profundidad nace de
+         la suma de capas (reflejo superior + borde interno + sombra suave),
+         no de una sola sombra dura.
+     ========================================================================== */
+  .glass {
+    background-color: rgb(var(--surface) / 0.62);
+    -webkit-backdrop-filter: blur(16px) saturate(1.35);
+    backdrop-filter: blur(16px) saturate(1.35);
+    /* Capas: reflejo superior suave + borde interno sutil + doble sombra
+       difusa (contacto cercano + ambiente lejano de baja opacidad). */
+    box-shadow: inset 0 1px 0 0 rgb(var(--glass-edge) / 0.08),
+      inset 0 0 0 1px rgb(var(--glass-edge) / 0.03),
+      0 1px 2px rgb(0 0 0 / 0.06), 0 12px 32px rgb(0 0 0 / 0.1);
+  }
+  .glass-subtle {
+    background-color: rgb(var(--surface-2) / 0.55);
+    -webkit-backdrop-filter: blur(10px) saturate(1.25);
+    backdrop-filter: blur(10px) saturate(1.25);
+    /* Sin sombra exterior: vive dentro de otra superficie de cristal. */
+    box-shadow: inset 0 1px 0 0 rgb(var(--glass-edge) / 0.05);
+  }
+  .glass-elevated {
+    background-color: rgb(var(--surface) / 0.72);
+    -webkit-backdrop-filter: blur(22px) saturate(1.45);
+    backdrop-filter: blur(22px) saturate(1.45);
+    box-shadow: inset 0 1px 0 0 rgb(var(--glass-edge) / 0.1),
+      inset 0 0 0 1px rgb(var(--glass-edge) / 0.04),
+      0 2px 6px rgb(0 0 0 / 0.08), 0 24px 56px rgb(0 0 0 / 0.16);
+  }
+  .glass-bar {
+    background-color: rgb(var(--bg) / 0.68);
+    -webkit-backdrop-filter: blur(20px) saturate(1.45);
+    backdrop-filter: blur(20px) saturate(1.45);
+    box-shadow: inset 0 -1px 0 0 rgb(var(--glass-edge) / 0.05);
+  }
+}
+
+/* ==========================================================================
+   Escenas de minijuego: el lienzo es SIEMPRE oscuro (identidad del producto),
+   independiente del tema. Esta clase fija los tokens de texto/borde dentro
+   de la escena para garantizar contraste también en tema claro.
+   ========================================================================== */
+.scene-dark {
+  --text: 237 240 242;
+  --text-muted: 148 158 165;
+  --border: 38 44 50;
+  --surface: 18 21 24;
+  --surface-2: 24 28 32;
+  --code-bg: 13 16 19;
+  /* El acento neón del tema oscuro: contraste correcto sobre el lienzo. */
+  --accent: 46 229 157;
+  --accent-strong: 30 200 135;
+  --success: 46 229 157;
+  --danger: 251 113 133;
+}
+
+/* Fallback de legibilidad: si el navegador no soporta backdrop-filter, las
+   superficies de cristal vuelven a ser casi opacas (contraste garantizado). */
+@supports not ((backdrop-filter: blur(1px))) {
+  .glass,
+  .glass-elevated {
+    background-color: rgb(var(--surface) / 0.96);
+  }
+  .glass-subtle {
+    background-color: rgb(var(--surface-2) / 0.92);
+  }
+  .glass-bar {
+    background-color: rgb(var(--bg) / 0.94);
+  }
+}
