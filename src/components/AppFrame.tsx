@@ -8,6 +8,7 @@
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import Header from "./Header";
+import Aurora from "./Aurora";
 import { pageVariants, transition } from "@/lib/motion";
 
 export default function AppFrame({
@@ -19,6 +20,7 @@ export default function AppFrame({
 
   return (
     <div className="flex min-h-screen flex-col">
+      <Aurora />
       <Header />
       <AnimatePresence mode="wait" initial={false}>
         <motion.main

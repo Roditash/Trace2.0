@@ -53,5 +53,3 @@ export function evaluateDoorCode(code: string): DoorResult {
   return { hasKey, keyValue, hasIf, hasOpen, wellFormed, opens };
 }
 
-/** Alias semántico de la spec (Fase 7). Equivale a evaluateDoorCode. */
-export const validateSecretDoor = evaluateDoorCode;

@@ -31,13 +31,22 @@ const config: Config = {
         glass: withVar("--glass-edge"),
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        // Pila "SF-first": en dispositivos Apple se usa San Francisco nativa;
+        // en el resto, Inter (métricas casi idénticas). Identidad Apple real.
+        sans: [
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "var(--font-inter)",
+          "system-ui",
+          "sans-serif",
+        ],
         mono: ["ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
       },
       borderRadius: {
-        xl: "0.875rem",
-        "2xl": "1.125rem",
-        "3xl": "1.5rem",
+        // Radios generosos y continuos (estética iOS/visionOS).
+        xl: "1rem",
+        "2xl": "1.375rem",
+        "3xl": "1.75rem",
       },
       boxShadow: {
         // Escala de elevación unificada (tokens --shadow-* de globals.css).

@@ -15,10 +15,12 @@
 // ANIMATION_SYSTEM 6.9 (hoverLift/stagger), 7.2 (Card), 7.6 (ProgressBar).
 // ============================================================================
 
+import { useRef } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import ProgressBar from "@/components/ui/ProgressBar";
 import ConceptIcon from "@/components/ui/ConceptIcon";
+import Icon from "@/components/ui/Icon";
 import { type World, type Level } from "@/lib/progression";
 import { conceptPreviewForWorld } from "@/lib/concepts";
 import { scale, transition, hoverLift, stagger } from "@/lib/motion";
@@ -36,41 +38,6 @@ interface WorldCardProps {
   locked?: boolean;
   /** Nombre del mundo que desbloquea a este (copy del estado bloqueado). */
   unlockedBy?: string;
-}
-
-function LockIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className="h-4 w-4"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <rect x="5" y="11" width="14" height="9" rx="2" />
-      <path d="M8 11V7a4 4 0 0 1 8 0v4" />
-    </svg>
-  );
-}
-
-function CheckMini() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className="h-3 w-3"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.4"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <path d="m5 13 4 4L19 7" />
-    </svg>
-  );
 }
 
 // ----------------------------------------------------------------------------
@@ -111,9 +78,11 @@ function WorldPreview({
               <ConceptIcon name={c.icon} className="h-3.5 w-3.5" />
               <span className="leading-none">{c.title}</span>
               {mastered && (
-                <span className="text-accent/90">
-                  <CheckMini />
-                </span>
+                <Icon
+                  name="check"
+                  className="h-3 w-3 text-accent/90"
+                  strokeWidth={2.4}
+                />
               )}
             </li>
           );
@@ -133,6 +102,16 @@ export default function WorldCard({
   locked = false,
   unlockedBy,
 }: WorldCardProps) {
+  // Spotlight que sigue al cursor (sin re-render): actualiza --mx / --my.
+  const cardRef = useRef<HTMLElement>(null);
+  const handleMove = (e: React.MouseEvent<HTMLElement>) => {
+    const el = cardRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    el.style.setProperty("--mx", `${e.clientX - r.left}px`);
+    el.style.setProperty("--my", `${e.clientY - r.top}px`);
+  };
+
   // ---- Estado bloqueado: premium, con profundidad y preview difuminada. ----
   if (locked) {
     return (
@@ -165,7 +144,7 @@ export default function WorldCard({
               </div>
             </div>
             <span className="flex shrink-0 items-center gap-1.5 rounded-md bg-surface-2/70 px-2 py-1 text-[11px] font-medium text-muted ring-1 ring-inset ring-border/60">
-              <LockIcon />
+              <Icon name="lock" className="h-3.5 w-3.5" strokeWidth={1.8} />
               Bloqueado
             </span>
           </div>
@@ -203,8 +182,10 @@ export default function WorldCard({
   return (
     <Link href={`/worlds/${world.id}`} className="block rounded-2xl">
       <motion.article
+        ref={cardRef}
+        onMouseMove={handleMove}
         className={[
-          "glass group relative rounded-2xl border p-5 elevation-sm transition-[border-color,box-shadow] duration-200",
+          "card-spotlight glass group relative rounded-2xl border p-5 elevation-sm transition-[border-color,box-shadow] duration-200",
           isCompleted ? "border-success/40" : "border-glass/10",
           "[@media(hover:hover)]:hover:border-glass/20 [@media(hover:hover)]:hover:shadow-lg",
         ].join(" ")}
@@ -261,9 +242,9 @@ export default function WorldCard({
         {/* Affordance de apertura, discreta, sólo con hover fino. */}
         <span
           aria-hidden
-          className="pointer-events-none absolute bottom-5 right-5 text-muted opacity-0 transition-opacity duration-200 [@media(hover:hover)]:group-hover:opacity-100"
+          className="pointer-events-none absolute bottom-5 right-5 text-muted opacity-0 transition-all duration-200 [@media(hover:hover)]:group-hover:translate-x-0.5 [@media(hover:hover)]:group-hover:opacity-100"
         >
-          →
+          <Icon name="arrow-right" className="h-4 w-4" />
         </span>
       </motion.article>
     </Link>

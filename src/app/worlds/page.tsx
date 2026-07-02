@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import { RevealGroup, RevealItem } from "@/components/ui/Reveal";
 import WorldCard from "@/components/progression/WorldCard";
 import ProgressBar from "@/components/ui/ProgressBar";
+import WordReveal from "@/components/ui/WordReveal";
 import { useProgress } from "@/context/ProgressContext";
 import { WORLDS, getLevelsForWorld } from "@/lib/progression";
 import { staggerContainer, slideVariants, transition } from "@/lib/motion";
@@ -24,9 +25,10 @@ export default function WorldsPage() {
       <RevealGroup>
         <RevealItem>
           <header className="mb-2">
-            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-              Mundos
-            </h1>
+            <WordReveal
+              text="Mundos"
+              className="text-2xl font-semibold tracking-tight sm:text-3xl"
+            />
             <p className="mt-2 text-muted">
               Cada mundo es un lenguaje. Completa los niveles para avanzar.
             </p>

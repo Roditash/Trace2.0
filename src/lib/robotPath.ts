@@ -69,5 +69,3 @@ export function evaluateRobotCode(code: string): RobotResult {
   };
 }
 
-/** Alias semántico de la spec (Fase 9). Equivale a evaluateRobotCode. */
-export const validateRobotPath = evaluateRobotCode;

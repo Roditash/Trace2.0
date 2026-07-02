@@ -1,10 +1,12 @@
 "use client";
 
 // ============================================================================
-// Button - ANIMATION_SYSTEM 7.1 + microinteracciones premium (iOS/Linear).
+// Button - ANIMATION_SYSTEM 7.1 + microinteracciones premium (iOS/macOS).
+// Estética Apple: píldora continua, azul de sistema con texto blanco,
+// secundario tipo "filled gray" de iOS y ghost tipo enlace de barra.
 // Hover: scale.hover + elevación magnética de 1px (sutil, nunca exagerada).
 // Press: scale.pressed (spring.snappy) — feedback suave, sin rebote.
-// Focus: outline global + glow eléctrico discreto en el variant primary.
+// Focus: outline global + halo discreto en el variant primary.
 // Disabled: sin animaciones de movimiento.
 // ============================================================================
 
@@ -20,19 +22,19 @@ interface ButtonProps extends Omit<HTMLMotionProps<"button">, "ref"> {
 }
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-xl font-medium select-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
+  "inline-flex items-center justify-center gap-2 rounded-full font-medium tracking-[-0.01em] select-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
 
 const variants: Record<Variant, string> = {
   primary:
-    "bg-accent text-bg hover:bg-accent-strong shadow-sm focus-visible:shadow-[0_0_16px_rgb(var(--accent)/0.35)]",
+    "sheen bg-accent text-white hover:bg-accent-strong shadow-sm focus-visible:shadow-[0_0_16px_rgb(var(--accent)/0.4)]",
   secondary:
-    "bg-surface-2 text-text hover:bg-surface border border-border",
-  ghost: "bg-transparent text-muted hover:text-text hover:bg-surface-2",
+    "bg-surface-2/80 text-text hover:bg-surface-2 border border-glass/10 backdrop-blur",
+  ghost: "bg-transparent text-accent hover:bg-accent/10",
 };
 
 const sizes: Record<Size, string> = {
-  md: "h-10 px-4 text-sm",
-  lg: "h-12 px-6 text-base",
+  md: "h-10 px-5 text-sm",
+  lg: "h-12 px-7 text-base",
 };
 
 export default function Button({

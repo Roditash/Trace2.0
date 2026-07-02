@@ -14,6 +14,7 @@
 import { useMemo, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { transition } from "@/lib/motion";
+import Icon from "@/components/ui/Icon";
 
 /** Estado visual del editor según la última ejecución. */
 export type EditorStatus = "idle" | "valid" | "invalid" | "completed";
@@ -124,15 +125,7 @@ export default function CodeEditor({
               ].join(" ")}
             >
               {CHIP[status].tone === "ok" ? (
-                <svg viewBox="0 0 24 24" fill="none" className="h-3 w-3" aria-hidden>
-                  <path
-                    d="M5 13l4 4L19 7"
-                    stroke="currentColor"
-                    strokeWidth={3}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <Icon name="check" className="h-3 w-3" strokeWidth={3} />
               ) : (
                 <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-danger" />
               )}

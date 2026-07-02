@@ -16,6 +16,7 @@
 
 import { motion } from "framer-motion";
 import { transition, spring } from "@/lib/motion";
+import Icon, { CHECK_PATH } from "@/components/ui/Icon";
 
 export type FlowStage = "problem" | "action" | "result";
 
@@ -65,7 +66,7 @@ function Step({
         {state === "done" && (
           <svg viewBox="0 0 24 24" fill="none" className="h-3 w-3" aria-hidden>
             <motion.path
-              d="M5 13l4 4L19 7"
+              d={CHECK_PATH}
               stroke="rgb(var(--accent))"
               strokeWidth={3}
               strokeLinecap="round"
@@ -122,7 +123,7 @@ export default function ProblemFlow({
               transition={transition.fade}
               className={i < activeIndex ? "text-accent" : "text-muted"}
             >
-              →
+              <Icon name="chevron-right" className="h-3.5 w-3.5" />
             </motion.span>
           )}
         </div>

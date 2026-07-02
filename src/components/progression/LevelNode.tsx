@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import { type LevelStatus, type Level } from "@/lib/progression";
 import { transition, spring, scale } from "@/lib/motion";
 import StarRating from "@/components/game/StarRating";
+import Icon, { CHECK_PATH } from "@/components/ui/Icon";
 
 interface LevelNodeProps {
   level: Level;
@@ -92,7 +93,8 @@ export default function LevelNode({
         >
           {/* Icono por estado */}
           {status === "completed" || status === "mastered" ? (
-            // Check (ANIMATION_SYSTEM 5.7): pathLength 0->1 con spring.snappy
+            // Check (ANIMATION_SYSTEM 5.7): pathLength 0->1 con spring.snappy.
+            // Usa CHECK_PATH compartido para una geometría coherente.
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -100,7 +102,7 @@ export default function LevelNode({
               aria-hidden
             >
               <motion.path
-                d="M5 13l4 4L19 7"
+                d={CHECK_PATH}
                 stroke="rgb(var(--success))"
                 strokeWidth={2.5}
                 strokeLinecap="round"
@@ -112,28 +114,11 @@ export default function LevelNode({
             </svg>
           ) : status === "locked" ? (
             // Candado (ANIMATION_SYSTEM 5.21)
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
+            <Icon
+              name="lock"
               className="h-4 w-4 opacity-40"
-              aria-hidden
-            >
-              <rect
-                x="5"
-                y="11"
-                width="14"
-                height="10"
-                rx="2"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              />
-              <path
-                d="M8 11V7a4 4 0 1 1 8 0v4"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-              />
-            </svg>
+              strokeWidth={1.6}
+            />
           ) : (
             // Disponible: número del nivel
             <span className="text-sm font-semibold text-accent">

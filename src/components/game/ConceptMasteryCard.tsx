@@ -15,6 +15,7 @@
 import { motion } from "framer-motion";
 import { slideVariants, transition, spring } from "@/lib/motion";
 import ConceptIcon from "@/components/ui/ConceptIcon";
+import Icon from "@/components/ui/Icon";
 import { getConcept } from "@/lib/concepts";
 
 interface ConceptMasteryCardProps {
@@ -77,9 +78,10 @@ export default function ConceptMasteryCard({
       {/* Lo que esto resuelve, en lenguaje del problema. */}
       {concept && (
         <div className="mt-4 flex items-start gap-2 rounded-xl bg-surface-2/60 p-3 text-sm text-muted ring-1 ring-inset ring-border/60">
-          <span aria-hidden className="mt-0.5 text-accent">
-            →
-          </span>
+          <Icon
+            name="arrow-right"
+            className="mt-0.5 h-4 w-4 shrink-0 text-accent"
+          />
           <span className="leading-relaxed">{concept.resolves}</span>
         </div>
       )}

@@ -24,6 +24,7 @@ import {
 import { LEVELS, WORLDS, getLevel } from "@/lib/progression";
 import { getConcept, iconForConcept } from "@/lib/concepts";
 import ConceptIcon from "@/components/ui/ConceptIcon";
+import { CHECK_PATH } from "@/components/ui/Icon";
 import { useProgress } from "@/context/ProgressContext";
 
 // Máximos derivados de la fuente de verdad (progression.ts).
@@ -149,10 +150,10 @@ function ConceptBadge({ levelId, earned }: { levelId: number; earned: boolean })
       >
         <ConceptIcon name={icon} className="h-4 w-4" />
         {earned && (
-          <span className="absolute -bottom-1 -right-1 grid h-4 w-4 place-items-center rounded-full bg-accent text-bg">
+          <span className="absolute -bottom-1 -right-1 grid h-4 w-4 place-items-center rounded-full bg-accent text-white">
             <svg viewBox="0 0 24 24" fill="none" className="h-2.5 w-2.5">
               <motion.path
-                d="M5 13l4 4L19 7"
+                d={CHECK_PATH}
                 stroke="currentColor"
                 strokeWidth={3}
                 strokeLinecap="round"

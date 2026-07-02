@@ -14,6 +14,7 @@ import ProgressBar from "@/components/ui/ProgressBar";
 import Button from "@/components/ui/Button";
 import ProgressDashboard from "@/components/progression/ProgressDashboard";
 import ConceptIcon from "@/components/ui/ConceptIcon";
+import Icon from "@/components/ui/Icon";
 import { useProgress } from "@/context/ProgressContext";
 import { WORLDS } from "@/lib/progression";
 import { getConcept, iconForConcept } from "@/lib/concepts";
@@ -63,17 +64,11 @@ export default function ProfilePage() {
               aria-hidden
               className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/10"
             >
-              <svg
-                viewBox="0 0 24 24"
+              <Icon
+                name="sparkle"
                 className="h-6 w-6 text-accent"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M12 3l2.4 5.1 5.6.7-4.1 3.9 1 5.6-4.9-2.7-4.9 2.7 1-5.6L4 8.8l5.6-.7L12 3z" />
-              </svg>
+                strokeWidth={1.6}
+              />
             </div>
             <h2 className="text-base font-semibold">
               Este perfil se llenará de logros
@@ -184,7 +179,7 @@ export default function ProfilePage() {
                 </Button>
                 <Button
                   size="md"
-                  className="bg-danger text-bg hover:opacity-90"
+                  className="!bg-danger !text-white hover:opacity-90"
                   onClick={() => {
                     resetProgress();
                     setConfirmReset(false);
