@@ -9,6 +9,7 @@
 
 import { motion } from "framer-motion";
 import { revealParent, slideVariants, transition, spring } from "@/lib/motion";
+import Icon from "@/components/ui/Icon";
 
 interface VisualizationProps {
   /** Concepto a representar (texto corto, ej. "Variables"). */
@@ -74,7 +75,7 @@ export default function Visualization({
                 </span>
                 {i < sequence.length - 1 && (
                   <span aria-hidden className="text-muted">
-                    →
+                    <Icon name="chevron-right" className="h-3.5 w-3.5" />
                   </span>
                 )}
               </motion.div>

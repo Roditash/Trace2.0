@@ -4,28 +4,30 @@
 
 /* ==========================================================================
    Trace - Estilos globales
-   Sistema de color sobrio inspirado en Linear / Raycast / Framer / Arc.
+   Identidad visual inspirada en Apple (macOS/iOS/visionOS): paleta de
+   sistema (azul #0071E3 / #0A84FF, grises neutros, verde y rojo de iOS),
+   superficies de cristal contenidas y profundidad por capas.
    Tokens expuestos como variables CSS; Tailwind los consume via theme.
    ========================================================================== */
 
 :root {
-  /* Tema claro */
-  --bg: 250 250 251;
+  /* Tema claro — paleta Apple (apple.com / iOS light) */
+  --bg: 245 245 247; /* #F5F5F7 */
   --surface: 255 255 255;
-  --surface-2: 244 244 246;
-  --border: 226 226 231;
-  --text: 23 23 28;
-  --text-muted: 110 110 122;
-  --accent: 13 165 122;
-  --accent-strong: 8 130 96;
-  --success: 16 185 129;
-  --danger: 244 63 94;
-  --code-bg: 244 244 246;
-  --star: 234 179 8;
+  --surface-2: 242 242 247; /* iOS systemGray6 */
+  --border: 222 222 228;
+  --text: 29 29 31; /* #1D1D1F */
+  --text-muted: 110 110 115; /* #6E6E73 */
+  --accent: 0 113 227; /* Apple blue #0071E3 */
+  --accent-strong: 0 96 199;
+  --success: 52 199 89; /* iOS green #34C759 */
+  --danger: 255 59 48; /* iOS red #FF3B30 */
+  --code-bg: 242 242 247;
+  --star: 255 204 0; /* iOS yellow #FFCC00 */
   /* Borde/reflejo del lenguaje de cristal (oscuro sobre tema claro) */
-  --glass-edge: 23 23 28;
-  /* Acento secundario (índigo) usado en gradientes ambientales y conceptos. */
-  --accent-2: 99 102 241;
+  --glass-edge: 29 29 31;
+  /* Acento secundario (índigo iOS #5856D6): gradientes ambientales y conceptos. */
+  --accent-2: 88 86 214;
 
   /* ----------------------------------------------------------------------
      Sistema de elevación (sombras por capas). Fuente única de profundidad.
@@ -40,24 +42,24 @@
 }
 
 .dark {
-  /* Tema oscuro (predeterminado del producto) */
-  --bg: 10 12 14;
-  --surface: 18 21 24;
-  --surface-2: 24 28 32;
-  --border: 38 44 50;
-  --text: 237 240 242;
-  --text-muted: 148 158 165;
-  /* Verde neón teal (inspiración AlgoMaster) */
-  --accent: 46 229 157;
-  --accent-strong: 30 200 135;
-  --success: 46 229 157;
-  --danger: 251 113 133;
-  --code-bg: 13 16 19;
-  --star: 250 204 21;
+  /* Tema oscuro (predeterminado) — negro cálido de apple.com + iOS dark */
+  --bg: 10 10 12;
+  --surface: 28 28 30; /* iOS systemGray6 dark #1C1C1E */
+  --surface-2: 44 44 46; /* #2C2C2E */
+  --border: 56 56 60; /* separador iOS dark */
+  --text: 245 245 247; /* #F5F5F7 */
+  --text-muted: 152 152 157; /* #98989D */
+  /* Azul de sistema iOS dark (#0A84FF) */
+  --accent: 10 132 255;
+  --accent-strong: 0 113 227;
+  --success: 48 209 88; /* iOS green dark #30D158 */
+  --danger: 255 69 58; /* iOS red dark #FF453A */
+  --code-bg: 18 18 21;
+  --star: 255 214 10; /* iOS yellow dark #FFD60A */
   /* Borde/reflejo del lenguaje de cristal (claro sobre tema oscuro) */
   --glass-edge: 255 255 255;
-  /* Acento secundario (índigo) — un punto más luminoso en oscuro. */
-  --accent-2: 129 140 248;
+  /* Acento secundario (índigo iOS dark #5E5CE6). */
+  --accent-2: 94 92 230;
 
   /* Elevación en tema oscuro: sombras más profundas y negras (el contraste
      viene de la oscuridad bajo la superficie, no de gris). */
@@ -96,6 +98,12 @@ body {
   color: rgb(var(--text));
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+/* Scroll suave en navegación interna (anclas). El reset de movimiento reducido
+   lo neutraliza arriba. */
+html {
+  scroll-behavior: smooth;
 }
 
 /* Foco visible y de alto contraste (ANIMATION_SYSTEM 5.9 / 11.3) */
@@ -224,6 +232,197 @@ body {
     }
   }
 
+  /* ----------------------------------------------------------------------
+     Spotlight de cursor (efecto Linear/Vercel). Un resplandor de acento muy
+     sutil que sigue al puntero sobre superficies interactivas. La posición
+     llega por --mx / --my (actualizadas en JS sin re-render). Solo puntero
+     fino; se desvanece suavemente al entrar/salir. ----------------------- */
+  .card-spotlight {
+    position: relative;
+    isolation: isolate;
+  }
+  .card-spotlight::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    background: radial-gradient(
+      18rem 18rem at var(--mx, 50%) var(--my, 0%),
+      rgb(var(--accent) / 0.14),
+      transparent 60%
+    );
+    pointer-events: none;
+  }
+  @media (hover: hover) {
+    .card-spotlight:hover::before {
+      opacity: 1;
+    }
+  }
+  /* El contenido se mantiene por encima del resplandor. */
+  .card-spotlight > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ----------------------------------------------------------------------
+     Sheen: un destello diagonal que cruza una vez sobre el elemento (botones
+     primarios al hover). Comunica "vivo" sin distraer. Respeta puntero fino. */
+  .sheen {
+    position: relative;
+    overflow: hidden;
+  }
+  .sheen::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -150%;
+    height: 100%;
+    width: 60%;
+    transform: skewX(-20deg);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgb(var(--glass-edge) / 0.18),
+      transparent
+    );
+    pointer-events: none;
+  }
+  @media (hover: hover) {
+    .sheen:hover::after {
+      animation: sheen-sweep 0.7s ease;
+    }
+  }
+  @keyframes sheen-sweep {
+    100% {
+      left: 150%;
+    }
+  }
+
+  /* Underline animado para enlaces de navegación/texto (crece desde la izq.). */
+  .link-underline {
+    background-image: linear-gradient(rgb(var(--accent)), rgb(var(--accent)));
+    background-size: 0% 1.5px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.25s ease;
+  }
+  .link-underline:hover {
+    background-size: 100% 1.5px;
+  }
+
+  /* Anula movimientos decorativos cuando el usuario reduce el movimiento. */
+  @media (prefers-reduced-motion: reduce) {
+    .sheen::after {
+      animation: none !important;
+    }
+    .card-spotlight::before {
+      transition: none;
+    }
+  }
+
+  /* ----------------------------------------------------------------------
+     AURORA — firma visual de Trace. Manchas de acento que derivan muy
+     lentamente en el fondo (fixed), dando una sensación de luz viva sin
+     distraer. Es la atmósfera que distingue a Trace de otros sitios de
+     aprendizaje: no es un patrón copiable, es luz en movimiento. Coste de
+     render mínimo (transform/opacity en compositor). ------------------- */
+  .aurora-blob {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(72px);
+    opacity: 0.5;
+    will-change: transform;
+    mix-blend-mode: screen;
+  }
+  .aurora-1 {
+    width: 46rem;
+    height: 46rem;
+    top: -16rem;
+    right: -10rem;
+    background: radial-gradient(
+      circle at 50% 50%,
+      rgb(var(--accent) / 0.5),
+      transparent 60%
+    );
+    animation: aurora-drift-1 26s ease-in-out infinite alternate;
+  }
+  .aurora-2 {
+    width: 40rem;
+    height: 40rem;
+    top: 18%;
+    left: -14rem;
+    background: radial-gradient(
+      circle at 50% 50%,
+      rgb(var(--accent-2) / 0.42),
+      transparent 62%
+    );
+    animation: aurora-drift-2 32s ease-in-out infinite alternate;
+  }
+  .aurora-3 {
+    width: 34rem;
+    height: 34rem;
+    bottom: -14rem;
+    left: 30%;
+    background: radial-gradient(
+      circle at 50% 50%,
+      rgb(var(--accent) / 0.3),
+      transparent 65%
+    );
+    animation: aurora-drift-3 38s ease-in-out infinite alternate;
+  }
+  /* En tema claro la aurora debe ser muchísimo más tenue (no lavar el blanco). */
+  :root .aurora-blob {
+    opacity: 0.22;
+    mix-blend-mode: multiply;
+  }
+  .dark .aurora-blob {
+    opacity: 0.5;
+    mix-blend-mode: screen;
+  }
+  @keyframes aurora-drift-1 {
+    0% {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+    100% {
+      transform: translate3d(-6rem, 4rem, 0) scale(1.12);
+    }
+  }
+  @keyframes aurora-drift-2 {
+    0% {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+    100% {
+      transform: translate3d(5rem, -3rem, 0) scale(1.1);
+    }
+  }
+  @keyframes aurora-drift-3 {
+    0% {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+    100% {
+      transform: translate3d(-3rem, -5rem, 0) scale(1.15);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .aurora-blob {
+      animation: none !important;
+    }
+  }
+
+  /* GRAIN — textura de grano finísima sobre todo el lienzo. Rompe los
+     degradados (evita el "banding") y aporta el acabado mate y premium de
+     una pieza editorial. SVG de ruido en data-uri, sin peticiones. */
+  .grain-overlay {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.025;
+  }
+  .dark .grain-overlay {
+    opacity: 0.035;
+  }
+
   /* ==========================================================================
      Lenguaje de cristal v2 (refinado: iOS/visionOS/Linear, elevación por capas).
      JERARQUÍA DE CAPAS (de menor a mayor elevación):
@@ -280,17 +479,17 @@ body {
    de la escena para garantizar contraste también en tema claro.
    ========================================================================== */
 .scene-dark {
-  --text: 237 240 242;
-  --text-muted: 148 158 165;
-  --border: 38 44 50;
-  --surface: 18 21 24;
-  --surface-2: 24 28 32;
-  --code-bg: 13 16 19;
-  /* El acento neón del tema oscuro: contraste correcto sobre el lienzo. */
-  --accent: 46 229 157;
-  --accent-strong: 30 200 135;
-  --success: 46 229 157;
-  --danger: 251 113 133;
+  --text: 245 245 247;
+  --text-muted: 152 152 157;
+  --border: 56 56 60;
+  --surface: 28 28 30;
+  --surface-2: 44 44 46;
+  --code-bg: 18 18 21;
+  /* El acento de sistema del tema oscuro: contraste correcto sobre el lienzo. */
+  --accent: 10 132 255;
+  --accent-strong: 0 113 227;
+  --success: 48 209 88;
+  --danger: 255 69 58;
 }
 
 /* Fallback de legibilidad: si el navegador no soporta backdrop-filter, las

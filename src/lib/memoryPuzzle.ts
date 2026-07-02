@@ -106,5 +106,3 @@ export function evaluateMemoryCode(code: string): MemoryResult {
   };
 }
 
-/** Alias semántico de la spec. Equivale a evaluateMemoryCode. */
-export const validateMemoryPuzzle = evaluateMemoryCode;

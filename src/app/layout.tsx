@@ -12,14 +12,48 @@ const inter = Inter({
   display: "swap",
 });
 
+const SITE_NAME = "Trace";
+const TITLE = "Trace — Aprende a pensar como programador";
+const DESCRIPTION =
+  "Resuelve problemas visuales y mira cómo el código aparece como consecuencia de tu razonamiento. 100% en tu navegador, sin cuentas.";
+
 export const metadata: Metadata = {
-  title: "Trace — Aprende a pensar como programador",
-  description:
-    "Trace: aprende a pensar como programador mediante retos visuales. Aplicación 100% en tu navegador.",
+  // Permite resolver rutas absolutas de OG/Twitter en el export estático.
+  metadataBase: new URL("https://trace.app"),
+  applicationName: SITE_NAME,
+  title: {
+    default: TITLE,
+    template: "%s · Trace",
+  },
+  description: DESCRIPTION,
+  keywords: [
+    "aprender a programar",
+    "pensamiento computacional",
+    "Python",
+    "lógica de programación",
+    "juego educativo",
+  ],
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    title: TITLE,
+    description: DESCRIPTION,
+    locale: "es_ES",
+    // opengraph-image.png en /app se detecta automáticamente.
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0a0c",
+  // Acompaña el cambio de tema de la barra del navegador (claro/oscuro).
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0c" },
+    { media: "(prefers-color-scheme: light)", color: "#f5f5f7" },
+  ],
   width: "device-width",
   initialScale: 1,
 };

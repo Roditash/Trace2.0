@@ -133,18 +133,32 @@ const FEEDBACK_STYLE: Record<
 
 // Detección mínima de sintaxis básica (sin parser): paréntesis sin cerrar
 // o comillas sin pareja. Devuelve un mensaje de mentor o null.
+// Los comentarios (#) se ignoran línea a línea para no dar falsos positivos
+// con apostrofes o símbolos dentro de un comentario (p. ej. "# it's ok").
 function detectBasicSyntaxIssue(code: string): string | null {
   let parens = 0;
   let brackets = 0;
   let doubles = 0;
   let singles = 0;
-  for (const ch of code) {
-    if (ch === "(") parens++;
-    else if (ch === ")") parens--;
-    else if (ch === "[") brackets++;
-    else if (ch === "]") brackets--;
-    else if (ch === '"') doubles++;
-    else if (ch === "'") singles++;
+  for (const line of code.split("\n")) {
+    let inDouble = false;
+    let inSingle = false;
+    for (const ch of line) {
+      // Un # fuera de cadenas inicia un comentario: el resto no cuenta.
+      if (ch === "#" && !inDouble && !inSingle) break;
+      if (ch === '"' && !inSingle) {
+        doubles++;
+        inDouble = !inDouble;
+      } else if (ch === "'" && !inDouble) {
+        singles++;
+        inSingle = !inSingle;
+      } else if (!inDouble && !inSingle) {
+        if (ch === "(") parens++;
+        else if (ch === ")") parens--;
+        else if (ch === "[") brackets++;
+        else if (ch === "]") brackets--;
+      }
+    }
   }
   if (parens > 0)
     return "Hay un paréntesis abierto que nunca se cierra. Revisa que cada ( tenga su ).";
@@ -199,14 +213,12 @@ export default function GameView({
   worldId: string;
   levelId: number;
 }) {
+  // Los hooks se ejecutan SIEMPRE y en el mismo orden (reglas de hooks);
+  // el guard de notFound() va después del último hook.
   const router = useRouter();
   const world = getWorld(worldId);
   const level = getLevel(levelId);
   const challenge = getChallenge(levelId);
-
-  if (!world || !level || !challenge || level.worldId !== worldId) {
-    notFound();
-  }
 
   const { recordCompletion, getStars } = useProgress();
   const isCrystalCounter = levelId === CRYSTAL_COUNTER_ID;
@@ -223,7 +235,7 @@ export default function GameView({
 
   // ---- Estado del flujo ----
   const [phase, setPhase] = useState<Phase>("intro");
-  const [code, setCode] = useState(challenge.starterCode);
+  const [code, setCode] = useState(() => challenge?.starterCode ?? "");
   const [revealed, setRevealed] = useState(0); // pistas reveladas (0-4)
   const [solutionShown, setSolutionShown] = useState(false);
   const [earnedStars, setEarnedStars] = useState(0);
@@ -290,11 +302,18 @@ export default function GameView({
   }, [feedback]);
 
   // Pistas usadas a efectos de estrellas.
-  const effectiveHints = solutionShown ? challenge.hints.length : revealed;
+  const effectiveHints = solutionShown
+    ? (challenge?.hints.length ?? 0)
+    : revealed;
   const previewStars = useMemo(
     () => starsForHints(effectiveHints),
     [effectiveHints]
   );
+
+  // Guard de ruta inválida: después de TODOS los hooks (orden estable).
+  if (!world || !level || !challenge || level.worldId !== worldId) {
+    notFound();
+  }
 
   // Navegación entre niveles del mismo mundo.
   const worldLevels = getLevelsForWorld(worldId);
@@ -318,6 +337,10 @@ export default function GameView({
 
   // ---- Ejecutar: Crystal Counter ----
   const runCrystal = () => {
+    // Limpia cualquier secuencia previa en curso (consistente con el resto).
+    timers.current.forEach((t) => window.clearTimeout(t));
+    timers.current = [];
+
     const result = evaluateCrystalCode(code);
     setRun(result);
     if (result.solved) {
@@ -328,16 +351,15 @@ export default function GameView({
       after(900, finishLevel);
       return;
     }
+    // solved = hasVariable && hasPrint: si no está resuelto, falta uno de los dos.
     if (!result.hasVariable) {
       conceptual(
         "Los cristales siguen sin contarse porque nada los recuerda. Una variable guarda ese número: crystals = 10"
       );
-    } else if (!result.hasPrint) {
+    } else {
       partial(
         "Ya guardaste la cantidad en crystals. Ahora falta hacerla visible: print(crystals) la muestra en pantalla."
       );
-    } else {
-      clearFeedback();
     }
   };
 
@@ -424,8 +446,14 @@ export default function GameView({
       return;
     }
 
-    // Cantidad de monedas a animar (lo que el jugador escribió).
-    const total = Math.max(1, result.coinsValue ?? TREASURE_COINS);
+    // Cantidad de monedas a animar (lo que el jugador escribió), acotada a
+    // un máximo razonable: con valores enormes la secuencia duraría minutos
+    // (mismo precedente que clampCrystals en crystalCounter.ts).
+    const MAX_ANIMATED_COINS = 12;
+    const total = Math.min(
+      MAX_ANIMATED_COINS,
+      Math.max(1, result.coinsValue ?? TREASURE_COINS)
+    );
     setLoopTotal(total);
 
     // ETAPA 1 (~150ms): aparecen las monedas -> "N monedas encontradas".

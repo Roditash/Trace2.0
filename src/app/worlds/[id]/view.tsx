@@ -23,13 +23,16 @@ import {
   WORLDS,
 } from "@/lib/progression";
 import { transition, staggerContainer, slideVariants } from "@/lib/motion";
+import Icon from "@/components/ui/Icon";
 
 export default function WorldDetailView({ id }: { id: string }) {
-  const world = getWorld(id);
-  if (!world) notFound();
-
+  // Los hooks se ejecutan SIEMPRE y en el mismo orden (reglas de hooks);
+  // el guard de notFound() va después, una vez resueltos los hooks.
   const router = useRouter();
   const { completedIds, getWorldProgress, getStars, ready } = useProgress();
+
+  const world = getWorld(id);
+  if (!world) notFound();
 
   const levels = getLevelsForWorld(id);
   const statuses = computeLevelStatuses(world, completedIds, WORLDS);
@@ -118,10 +121,10 @@ export default function WorldDetailView({ id }: { id: string }) {
               <button
                 type="button"
                 onClick={() => openLevel(firstAvailable.id)}
-                className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-accent px-4 py-2 text-sm font-medium text-bg transition-opacity hover:opacity-90"
+                className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-accent px-5 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
               >
                 Entrar al nivel
-                <span aria-hidden>→</span>
+                <Icon name="arrow-right" className="h-4 w-4" />
               </button>
             </div>
           </RevealItem>
@@ -156,12 +159,6 @@ export default function WorldDetailView({ id }: { id: string }) {
             >
               {levels.map((level, i) => {
                 const status = statuses[level.id] ?? "locked";
-                const isNextAvailable =
-                  status === "available" &&
-                  levels[i - 1] &&
-                  (statuses[levels[i - 1].id] === "completed" ||
-                    statuses[levels[i - 1].id] === "mastered");
-
                 const clickable =
                   status === "available" ||
                   status === "completed" ||
@@ -170,7 +167,6 @@ export default function WorldDetailView({ id }: { id: string }) {
                 return (
                   <motion.div
                     key={level.id}
-                    id={isNextAvailable ? "next-available" : undefined}
                     className={[
                       "rounded-xl p-3 transition-colors",
                       status === "available"

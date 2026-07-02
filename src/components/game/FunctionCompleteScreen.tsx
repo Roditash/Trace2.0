@@ -21,6 +21,7 @@ import {
   transition,
   spring,
 } from "@/lib/motion";
+import { CHECK_PATH } from "@/components/ui/Icon";
 import StarRating from "@/components/game/StarRating";
 import Button from "@/components/ui/Button";
 import ConceptMasteryCard from "@/components/game/ConceptMasteryCard";
@@ -73,7 +74,7 @@ export default function FunctionCompleteScreen({
       >
         <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8" aria-hidden>
           <motion.path
-            d="M5 13l4 4L19 7"
+            d={CHECK_PATH}
             stroke={ACCENT}
             strokeWidth={2.5}
             strokeLinecap="round"

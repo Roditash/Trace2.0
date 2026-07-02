@@ -69,5 +69,3 @@ export function evaluateLoopCode(code: string): LoopResult {
   };
 }
 
-/** Alias semántico de la spec (Fase 8). Equivale a evaluateLoopCode. */
-export const validateTreasureLoop = evaluateLoopCode;
